@@ -1,73 +1,751 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sports on Social 2026 Strategy</title>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WPP Sports on Social 2026 - Standalone</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
     <style>
-      body {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        background-color: #f8fafc;
-        -webkit-font-smoothing: antialiased;
-      }
-      h1, h2, h3, h4, h5, h6, .brand-font {
-        font-family: 'Inter', sans-serif;
-        letter-spacing: -0.02em;
-      }
-      .glass {
-        background: rgba(255, 255, 255, 0.7);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-      }
-      .chrome-gradient {
-        background: linear-gradient(135deg, #4285F4 0%, #34A853 33%, #FBBC05 66%, #EA4335 100%);
-      }
-      @keyframes float {
-        0% { transform: translateY(0px); }
-        50% { transform: translateY(-10px); }
-        100% { transform: translateY(0px); }
-      }
-      .animate-float {
-        animation: float 4s ease-in-out infinite;
-      }
-      @keyframes arrow-bounce {
-        0%, 100% { transform: translateX(0); }
-        50% { transform: translateX(10px); }
-      }
-      .animate-arrow-bounce {
-        animation: arrow-bounce 1.5s ease-in-out infinite;
-      }
-      @keyframes hop {
-        0%, 100% { transform: translateY(0); }
-        50% { transform: translateY(-12px); }
-      }
-      .hover-bounce:hover {
-        animation: hop 0.4s ease-out;
-      }
-      .scrollbar-hide::-webkit-scrollbar {
-        display: none;
-      }
-      .scrollbar-hide {
-        -ms-overflow-style: none;
-        scrollbar-width: none;
-      }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            zoom: 0.85;
+        }
+        @media screen and (-webkit-min-device-pixel-ratio:0) {
+            /* Chrome/Safari specific zoom if needed, but zoom property is usually enough */
+        }
+        .brand-font { font-family: 'Inter', sans-serif; }
+        .glass {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .shadow-3xl {
+            box-shadow: 0 32px 64px -12px rgba(0, 0, 0, 0.14);
+        }
+        .chrome-gradient {
+            background: linear-gradient(135deg, #4285F4 0%, #34A853 33%, #FBBC05 66%, #EA4335 100%);
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+        @keyframes arrow-bounce {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(5px); }
+        }
+        .animate-arrow-bounce {
+            animation: arrow-bounce 1s ease-in-out infinite;
+        }
+        @keyframes loading {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(250%); }
+        }
     </style>
-  <script type="importmap">
-{
-  "imports": {
-    "react/": "https://esm.sh/react@^19.2.3/",
-    "react": "https://esm.sh/react@^19.2.3",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "@google/genai": "https://esm.sh/@google/genai@^1.38.0"
-  }
-}
-</script>
-<link rel="stylesheet" href="/index.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    boxShadow: {
+                        '3xl': '0 32px 64px -12px rgba(0, 0, 0, 0.14)',
+                    },
+                    animation: {
+                        'loading': 'loading 1s ease-in-out infinite',
+                    }
+                }
+            }
+        }
+    </script>
 </head>
-  <body>
+<body class="bg-slate-50 text-slate-900">
     <div id="root"></div>
-  <script type="module" src="/index.tsx"></script>
+
+    <script type="importmap">
+    {
+        "imports": {
+            "react": "https://esm.sh/react@18.2.0",
+            "react-dom": "https://esm.sh/react-dom@18.2.0/client",
+            "@google/genai": "https://esm.sh/@google/genai@1.3.0"
+        }
+    }
+    </script>
+
+    <script type="text/babel" data-type="module">
+        import React, { useState, useRef, useEffect, useMemo } from 'react';
+        import ReactDOM from 'react-dom';
+        import { GoogleGenAI, Type } from '@google/genai';
+
+        // --- CONSTANTS ---
+        const TRENDS = [
+            {
+                id: 'PlayCallers',
+                label: 'The New Play Callers',
+                icon: '🎮',
+                color: 'bg-blue-600',
+                description: 'Algorithms, athletes, and creators now hold the keys to the control room, moving fandom from scheduled to discovered.',
+                subTrends: [
+                    'Algos as The New Commissioners',
+                    'Creators as The New Broadcast Channels',
+                    'NIL Athletes as The New Billion $$$ Brands'
+                ]
+            },
+            {
+                id: 'Multiplayer',
+                label: 'Creativity in MultiPlayer Mode',
+                icon: '🎚️',
+                color: 'bg-rose-500',
+                description: 'Moving from "Read-Only" to "Read/Write" fandom where IP is open-source material for the remix economy.',
+                subTrends: [
+                    'IP as Open Source Material',
+                    'Memes as the New Slang of Sports',
+                    'AI as Fuel for Fandom'
+                ]
+            },
+            {
+                id: 'UnseenStadiums',
+                label: 'Unseen Stadiums',
+                icon: '🏟️',
+                color: 'bg-amber-500',
+                description: 'Fandom is going private. Mass migration from public feeds to "invisible" spaces like Discord and WhatsApp.',
+                subTrends: [
+                    'Private Spaces as The New Sports Bar',
+                    'Betting + Fantasy as Financial Fandom',
+                    'Athletes as Always-On Conversion Conduits'
+                ]
+            }
+        ];
+
+        const BRIEF_EXAMPLES = [
+            { brand: 'Google Search', moment: 'World Cup', creative: 'The Search for Glory', audience: 'Global Fans', color: 'bg-blue-50 text-[#4285F4] border-blue-100 hover:bg-[#4285F4] hover:text-white hover:border-[#4285F4]' },
+            { brand: 'DoorDash', moment: 'World Cup', creative: 'Delivery to the Pitch', audience: 'Hungry Fans', color: 'bg-rose-50 text-rose-700 border-rose-100 hover:bg-rose-600 hover:text-white hover:border-rose-600' },
+            { brand: 'Audible', moment: 'Marathon Culture', creative: 'The Long Run', audience: 'Endurance Athletes', color: 'bg-amber-50 text-amber-700 border-amber-100 hover:bg-amber-600 hover:text-white hover:border-amber-600' },
+            { brand: 'Wendy\'s', moment: 'NFL', creative: 'Fresh Never Frozen Playoffs', audience: 'Game Day Grillers', color: 'bg-red-50 text-red-700 border-red-100 hover:bg-red-600 hover:text-white hover:border-red-600' }
+        ];
+
+        const SYSTEM_INSTRUCTION = `
+You are a World-Class Sports Media Strategist at WPP. 
+Your expertise is the "Sports on Social in 2026" framework.
+
+Core Philosophy:
+- The feed is the new field. Every screen is a stadium seat.
+- Fandom flows towards outer rings: Ring 1 (Live Moment), Ring 2 (Reaction Economy), Ring 3 (Cultural Layer).
+- Shift from "Fans as Audience" (Linear/Passive) to "Fans as Infrastructure" (Layered/Participatory).
+`;
+
+        // --- SERVICES ---
+        let ai = null;
+        const initAI = (key) => {
+            if (key) ai = new GoogleGenAI({ apiKey: key });
+        };
+
+        // Initialize with platform-provided key
+        // In this environment, Vite will replace this placeholder
+        const platformKey = "%%GEMINI_API_KEY%%".replace(/%/g, '');
+        if (platformKey) {
+            initAI(platformKey);
+        }
+
+        async function generateSandboxConcept(trend, subTrend, product, moment, creativePlatform, audience, additionalNotes) {
+            if (!ai) throw new Error("API Key required");
+            const response = await ai.models.generateContent({
+                model: 'gemini-3-flash-preview',
+                contents: `Design a sports media activation strategy for:
+Product/Brand: ${product}
+Creative/Strategy Platform: ${creativePlatform || 'Not specified'}
+Sports Moment/League: ${moment}
+Target Audience: ${audience || 'General sports fans'}
+Additional Notes: ${additionalNotes || 'None'}
+Trend: ${trend}
+Sub-Trend/Context: ${subTrend}
+
+Apply the WPP "Sports on Social 2026" playbook. 
+Focus on generating a "Strategic Provocation" (a tight, punchy, provocative statement that anchors the strategy - MAXIMUM 20 WORDS) and a bunch of Tactical Platform Thoughts.
+
+You MUST provide tactical ideas for exactly 4 platforms:
+1. Linear TV
+2. YouTube
+3. Two other key Social Platforms (e.g., TikTok, Instagram, Reddit, Twitch, etc.)
+
+For EACH of the 4 platforms, you MUST provide 2-3 distinct tactical variants.
+Each variant must have a catchy title, a description of the execution, and the specific media inspiration/implication.`,
+                config: {
+                    systemInstruction: SYSTEM_INSTRUCTION,
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: Type.OBJECT,
+                        properties: {
+                            themeTitle: { type: Type.STRING },
+                            strategicProvocation: { type: Type.STRING },
+                            tacticalIdeas: {
+                                type: Type.ARRAY,
+                                items: {
+                                    type: Type.OBJECT,
+                                    properties: {
+                                        platform: { type: Type.STRING },
+                                        variants: {
+                                            type: Type.ARRAY,
+                                            items: {
+                                                type: Type.OBJECT,
+                                                properties: {
+                                                    title: { type: Type.STRING },
+                                                    description: { type: Type.STRING },
+                                                    mediaInspiration: { type: Type.STRING }
+                                                },
+                                                required: ["title", "description", "mediaInspiration"]
+                                            }
+                                        }
+                                    },
+                                    required: ["platform", "variants"]
+                                }
+                            }
+                        },
+                        required: ["themeTitle", "strategicProvocation", "tacticalIdeas"]
+                    }
+                },
+            });
+
+            const data = JSON.parse(response.text || '{}');
+            return {
+                ...data,
+                id: Math.random().toString(36).substring(7),
+                timestamp: Date.now()
+            };
+        }
+
+        async function chatWithBriefAgent(history, message) {
+            if (!ai) throw new Error("API Key required");
+            const response = await ai.models.generateContent({
+                model: 'gemini-3-flash-preview',
+                contents: [
+                    ...history.map(m => ({
+                        role: m.role,
+                        parts: [{ text: m.text }]
+                    })),
+                    { role: 'user', parts: [{ text: message }] }
+                ],
+                config: {
+                    systemInstruction: SYSTEM_INSTRUCTION + "\nYou are the Strategy Agent for WPP. Help planners understand fandom fragmentation, 'botcasting', and the Dark Funnel.",
+                    tools: [{ googleSearch: {} }]
+                }
+            });
+
+            return response.text;
+        }
+
+        // --- COMPONENTS ---
+        const WPPLogo = () => (
+            <div className="flex items-center gap-1 font-black text-xl tracking-tighter">
+                <div className="w-10 h-10 bg-slate-900 text-white flex items-center justify-center rounded-lg text-xs leading-none">
+                    WPP
+                </div>
+            </div>
+        );
+
+        const FormatResponse = ({ text }) => {
+            const formattedText = text.split('\n').map((line, i) => {
+                const parts = line.split(/(\*\*.*?\*\*)/g);
+                return (
+                    <div key={i} className={line.trim() === '' ? 'h-4' : 'mb-2 last:mb-0'}>
+                        {parts.map((part, j) => {
+                            if (part.startsWith('**') && part.endsWith('**')) {
+                                return <strong key={j} className="font-black text-slate-900">{part.slice(2, -2)}</strong>;
+                            }
+                            return part;
+                        })}
+                    </div>
+                );
+            });
+            return React.createElement(React.Fragment, null, formattedText);
+        };
+
+        const ChatWidget = ({ messages, loading, onSendMessage }) => {
+            const [input, setInput] = useState('');
+            const scrollRef = useRef(null);
+
+            useEffect(() => {
+                if (scrollRef.current) {
+                    scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+                }
+            }, [messages]);
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                onSendMessage(e, input);
+                setInput('');
+            };
+
+            const suggestions = [
+                "Explain the shift from 'Fans as Audience' to 'Fans as Infrastructure'.",
+                "How can we reach 'Ring 3' Cultural Layer fandom via social media?",
+                "What are Trojan Horse assets and how do they penetrate the Dark Funnel?",
+                "Give me platform-native tactics for Pinterest vs Reddit for a sports brief."
+            ];
+
+            return (
+                <div id="chat-widget-container" className="flex flex-col h-[750px] bg-white rounded-[40px] shadow-3xl overflow-hidden border border-slate-200">
+                    <div className="bg-[#0f172a] p-8 flex items-center justify-between text-white border-b border-white/5">
+                        <div className="flex items-center gap-5">
+                            <div className="relative">
+                                <div className="w-16 h-16 rounded-full chrome-gradient flex items-center justify-center p-[3px]">
+                                    <div className="bg-[#0f172a] w-full h-full rounded-full flex items-center justify-center shadow-inner">
+                                        <span className="text-3xl">🏛️</span>
+                                    </div>
+                                </div>
+                                <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 border-4 border-[#0f172a] rounded-full"></div>
+                            </div>
+                            <div>
+                                <span className="block font-black text-2xl tracking-tight uppercase leading-none text-white">STRATEGY AGENT</span>
+                                <span className="text-[11px] text-slate-400 font-bold tracking-[0.25em] uppercase block mt-1.5">WPP Intelligence Engine</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div ref={scrollRef} className="flex-1 overflow-y-auto p-10 space-y-10 bg-[#f8fafc]/50 scroll-smooth">
+                        {messages.map((m, i) => (
+                            <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                                <div className={`max-w-[85%] p-8 rounded-[36px] text-lg leading-relaxed font-medium shadow-sm border ${
+                                    m.role === 'user' 
+                                        ? 'bg-slate-900 text-white rounded-tr-none border-slate-800' 
+                                        : 'bg-white text-slate-700 rounded-tl-none border-slate-100'
+                                }`}>
+                                    {m.role === 'user' ? m.text : <FormatResponse text={m.text} />}
+                                </div>
+                            </div>
+                        ))}
+                        {loading && (
+                            <div className="flex justify-start">
+                                <div className="bg-white border border-slate-100 text-slate-400 p-8 rounded-[36px] rounded-tl-none text-base flex gap-4 items-center shadow-sm">
+                                    <span className="font-bold tracking-tight text-slate-400">Consulting WPP Archives...</span>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="px-10 py-8 bg-white border-t border-slate-100">
+                        <div className="grid grid-cols-2 gap-5">
+                            {suggestions.map((s, i) => (
+                                <button
+                                    key={i}
+                                    onClick={(e) => onSendMessage(e, s)}
+                                    className="group p-6 bg-[#f1f5f9] hover:bg-slate-900 border-2 border-transparent hover:border-slate-800 rounded-[32px] text-left transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
+                                >
+                                    <p className="text-sm font-black text-slate-600 group-hover:text-white leading-snug tracking-tight">
+                                        {s}
+                                    </p>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="p-10 bg-white border-t border-slate-100">
+                        <form onSubmit={handleSubmit} className="relative group">
+                            <input 
+                                type="text" 
+                                value={input}
+                                onChange={(e) => setInput(e.target.value)}
+                                placeholder="Ask a strategic sports question..."
+                                className="w-full bg-[#f1f5f9] text-slate-900 border-2 border-transparent rounded-[28px] px-10 py-6 pr-24 focus:outline-none focus:bg-white focus:border-slate-900 focus:ring-8 focus:ring-slate-900/5 transition-all text-lg font-bold placeholder:text-slate-400"
+                            />
+                            <button 
+                                type="submit"
+                                disabled={loading}
+                                className="absolute right-4 top-1/2 -translate-y-1/2 w-14 h-14 bg-[#0f172a] rounded-full flex items-center justify-center text-white shadow-xl hover:bg-green-600 transition-all hover:scale-105 disabled:opacity-50 active:scale-95"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                </svg>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            );
+        };
+
+        const SandboxConcept = ({ activation, color, onGenerateMore, onRiff }) => {
+            const [variantIndices, setVariantIndices] = useState({});
+
+            const getPlatformIcon = (platform) => {
+                const p = platform.toLowerCase();
+                if (p.includes('linear') || p.includes('tv')) return '📺';
+                if (p.includes('youtube')) return '🔴';
+                if (p.includes('tiktok')) return '📱';
+                if (p.includes('instagram') || p.includes('ig')) return '📸';
+                if (p.includes('twitter') || p.includes('x')) return '🐦';
+                if (p.includes('twitch')) return '👾';
+                if (p.includes('reddit')) return '🧡';
+                if (p.includes('pinterest')) return '📌';
+                return '🚀';
+            };
+
+            const cycleVariant = (platformIdx, totalVariants) => {
+                setVariantIndices(prev => ({
+                    ...prev,
+                    [platformIdx]: ((prev[platformIdx] || 0) + 1) % totalVariants
+                }));
+            };
+
+            return (
+                <div className="bg-white rounded-[48px] overflow-hidden border border-slate-100 shadow-3xl">
+                    <div className={`${color} p-12 md:p-16 text-white relative overflow-hidden`}>
+                        <div className="absolute top-0 right-0 p-8 opacity-10 text-[100px] font-black pointer-events-none select-none leading-none -mr-8 -mt-8">
+                            2026
+                        </div>
+                        <div className="relative z-10 space-y-4">
+                            <h3 className="text-4xl md:text-6xl font-black tracking-tighter leading-none uppercase max-w-3xl">{activation.themeTitle}</h3>
+                        </div>
+                    </div>
+
+                    <div className="bg-slate-900 p-12 md:p-16 flex flex-col md:flex-row items-center gap-8 text-white border-y border-white/10">
+                        <div className="w-16 h-16 rounded-full bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-3xl flex-shrink-0 animate-pulse">⚡</div>
+                        <div className="text-center md:text-left space-y-2">
+                            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-blue-400 block">Strategic Provocation</span>
+                            <p className="text-2xl md:text-4xl font-black italic tracking-tight leading-tight max-w-4xl">
+                                "{activation.strategicProvocation}"
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="p-12 md:p-20 bg-slate-50/50 space-y-16">
+                        <div className="text-center space-y-4">
+                            <h4 className="text-4xl md:text-6xl font-black text-slate-900 uppercase tracking-tighter leading-none">Tactical Platform <span className="text-blue-600 italic">Thoughts</span></h4>
+                            <p className="text-slate-500 font-medium text-xl">Cycle through ideas to find the perfect media fit</p>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                            {activation.tacticalIdeas.map((platformData, pIdx) => {
+                                const currentIdx = variantIndices[pIdx] || 0;
+                                const currentVariant = platformData.variants[currentIdx];
+                                
+                                return (
+                                    <div key={pIdx} className="group bg-white p-12 rounded-[48px] border border-slate-100 shadow-md hover:shadow-2xl transition-all flex flex-col h-full relative overflow-hidden">
+                                        <div className="absolute top-0 left-0 right-0 flex gap-1 p-4">
+                                            {platformData.variants.map((_, vIdx) => (
+                                                <div key={vIdx} className={`h-1 flex-1 rounded-full transition-all duration-500 ${vIdx === currentIdx ? 'bg-blue-600' : 'bg-slate-100'}`} />
+                                            ))}
+                                        </div>
+
+                                        <div className="flex items-center justify-between mb-8 mt-4">
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
+                                                    {getPlatformIcon(platformData.platform)}
+                                                </div>
+                                                <span className="text-sm font-black text-blue-600 uppercase tracking-widest">{platformData.platform}</span>
+                                            </div>
+                                            
+                                            {platformData.variants.length > 1 && (
+                                                <button 
+                                                    onClick={() => cycleVariant(pIdx, platformData.variants.length)}
+                                                    className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-slate-900 hover:text-white transition-all shadow-sm active:scale-90"
+                                                >
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7" />
+                                                    </svg>
+                                                </button>
+                                            )}
+                                        </div>
+                                        
+                                        <div className="space-y-6 flex-1" key={`${pIdx}-${currentIdx}`}>
+                                            <h5 className="text-2xl font-black text-slate-900 leading-tight uppercase group-hover:text-blue-600 transition-colors">{currentVariant.title}</h5>
+                                            <p className="text-slate-600 leading-relaxed font-medium">
+                                                {currentVariant.description}
+                                            </p>
+                                            
+                                            <div className="pt-6 border-t border-slate-50">
+                                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Media Inspiration</span>
+                                                <p className="text-sm text-slate-500 italic font-bold">
+                                                    {currentVariant.mediaInspiration}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div className="mt-10 flex gap-3">
+                                            <button 
+                                                onClick={() => onRiff(`${platformData.platform}: ${currentVariant.title}`)}
+                                                className="flex-1 py-4 rounded-2xl bg-slate-50 text-slate-400 font-black uppercase text-[10px] tracking-widest hover:bg-slate-900 hover:text-white transition-all flex items-center justify-center gap-2 group/riff"
+                                            >
+                                                <span>Riff on this</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+
+                        {onGenerateMore && (
+                            <div className="mt-20 flex justify-center">
+                                <button 
+                                    onClick={onGenerateMore}
+                                    className="group flex items-center gap-3 px-10 py-5 bg-slate-900 text-white rounded-full font-black uppercase tracking-[0.2em] hover:bg-[#4285F4] transition-all duration-300 shadow-2xl hover:scale-105 active:scale-95"
+                                >
+                                    <span>generate more?</span>
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        const App = () => {
+            const [activeTrend, setActiveTrend] = useState(null);
+            const [productBrand, setProductBrand] = useState('');
+            const [targetMoment, setTargetMoment] = useState('');
+            const [creativePlatform, setCreativePlatform] = useState('');
+            const [audience, setAudience] = useState('');
+            const [additionalNotes, setAdditionalNotes] = useState('');
+            const [currentActivation, setCurrentActivation] = useState(null);
+            const [isGenerating, setIsGenerating] = useState(false);
+            const [showChaos, setShowChaos] = useState(false);
+            const [messages, setMessages] = useState([
+                { role: 'model', text: 'Strategy Agent Online. I have full context on the **"Sports on Social 2026"** strategy. How can I help you implement a refreshed sports media approach today?' }
+            ]);
+            const [chatLoading, setChatLoading] = useState(false);
+            const [showChatModal, setShowChatModal] = useState(false);
+            const step2Ref = useRef(null);
+
+            const handleQuickStart = (example) => {
+                setProductBrand(example.brand);
+                setTargetMoment(example.moment);
+                setCreativePlatform(example.creative || '');
+                setAudience(example.audience || '');
+            };
+
+            const handleSaveStep1 = () => {
+                step2Ref.current?.scrollIntoView({ behavior: 'smooth' });
+            };
+
+            const handleSendMessage = async (e, customInput) => {
+                if (e) e.preventDefault();
+                const messageToSend = customInput;
+                if (!messageToSend || !messageToSend.trim() || chatLoading) return;
+
+                setMessages(prev => [...prev, { role: 'user', text: messageToSend }]);
+                setChatLoading(true);
+
+                try {
+                    const response = await chatWithBriefAgent(messages, messageToSend);
+                    setMessages(prev => [...prev, { role: 'model', text: response || "System error." }]);
+                } catch (err) {
+                    console.error(err);
+                    setMessages(prev => [...prev, { role: 'model', text: "Error: " + err.message }]);
+                } finally {
+                    setChatLoading(false);
+                }
+            };
+
+            const handleRiff = (ideaTitle) => {
+                const riffPrompt = `I want to riff on the idea: "${ideaTitle}". How can we build on this for ${productBrand} during ${targetMoment}? Give me 3 specific execution variants.`;
+                handleSendMessage(null, riffPrompt);
+                setShowChatModal(true);
+            };
+
+            const handleGenerate = async () => {
+                if (!activeTrend || !productBrand.trim() || !targetMoment.trim()) return;
+                setShowChaos(true);
+                setCurrentActivation(null);
+                
+                setTimeout(async () => {
+                    setShowChaos(false);
+                    setIsGenerating(true);
+                    try {
+                        const activation = await generateSandboxConcept(
+                            activeTrend.label, 
+                            activeTrend.subTrends[0],
+                            productBrand,
+                            targetMoment,
+                            creativePlatform,
+                            audience,
+                            additionalNotes
+                        );
+                        setCurrentActivation(activation);
+                    } catch (err) {
+                        alert(err.message);
+                    } finally {
+                        setIsGenerating(false);
+                    }
+                }, 1800);
+            };
+
+            const isFormValid = activeTrend && productBrand.trim() && targetMoment.trim();
+
+            return (
+                <div className="min-h-screen pb-32 selection:bg-blue-100">
+                    <header className="sticky top-0 z-50 glass border-b border-slate-100">
+                        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <WPPLogo />
+                                <div className="border-l border-slate-200 pl-4">
+                                    <span className="font-black text-xl text-slate-900 tracking-tighter block uppercase leading-none">Sports On Social</span>
+                                    <span className="text-[10px] text-slate-400 font-bold tracking-[0.3em] uppercase block leading-none mt-1">Refreshed 2026 Media Approach</span>
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+
+                    <main>
+                        <div className="max-w-5xl mx-auto px-6 py-16 md:py-24 space-y-16 text-center">
+                            <h1 className="text-4xl md:text-6xl font-black tracking-tight text-slate-900 leading-[1.1]">
+                                <span className="text-[#4285F4]">Sports on Social</span><br/> 
+                                <span className="text-slate-400 text-3xl md:text-5xl block mt-2">2026 Strategy Playbook</span>
+                            </h1>
+                            <p className="text-xl md:text-2xl text-slate-500 max-w-4xl mx-auto font-medium leading-relaxed">
+                                The feed is the new field and every screen is now a stadium seat. Sports in 2026 is shared, not broadcast—owned by the crowd and shaped by creators.
+                            </p>
+                        </div>
+
+                        <section className="max-w-7xl mx-auto px-6 mb-8">
+                            <div className="bg-white rounded-[48px] shadow-3xl border border-slate-100 p-10 md:p-16 space-y-12">
+                                <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                                    <div className="space-y-2">
+                                        <span className="text-[10px] font-black text-blue-600 uppercase tracking-[0.4em] block">Step 01</span>
+                                        <h2 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight leading-none uppercase">Define your <span className="text-blue-600 italic">Brief</span></h2>
+                                    </div>
+                                    <div className="flex flex-wrap gap-3">
+                                        {BRIEF_EXAMPLES.map((ex, i) => (
+                                            <button
+                                                key={i}
+                                                onClick={() => handleQuickStart(ex)}
+                                                className={`px-6 py-3 rounded-full border-2 font-black uppercase text-[11px] tracking-widest transition-all duration-300 ${ex.color}`}
+                                            >
+                                                {ex.brand} x {ex.moment}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    <input type="text" value={productBrand} onChange={(e) => setProductBrand(e.target.value)} placeholder="Product / Brand" className="w-full p-8 rounded-[32px] bg-slate-50 border-2 border-slate-100 font-black text-xl" />
+                                    <input type="text" value={creativePlatform} onChange={(e) => setCreativePlatform(e.target.value)} placeholder="Creative Platform" className="w-full p-8 rounded-[32px] bg-slate-50 border-2 border-slate-100 font-black text-xl" />
+                                    <input type="text" value={targetMoment} onChange={(e) => setTargetMoment(e.target.value)} placeholder="Moment / League" className="w-full p-8 rounded-[32px] bg-slate-50 border-2 border-slate-100 font-black text-xl" />
+                                    <input type="text" value={audience} onChange={(e) => setAudience(e.target.value)} placeholder="Audience" className="w-full p-8 rounded-[32px] bg-slate-50 border-2 border-slate-100 font-black text-xl" />
+                                    <div className="md:col-span-2">
+                                        <input type="text" value={additionalNotes} onChange={(e) => setAdditionalNotes(e.target.value)} placeholder="Anything else? (Specific goals, constraints, etc.)" className="w-full p-8 rounded-[32px] bg-slate-50 border-2 border-slate-100 font-black text-xl" />
+                                    </div>
+                                </div>
+                                <div className="flex justify-end">
+                                    <button 
+                                        onClick={handleSaveStep1}
+                                        className="px-12 py-6 bg-slate-900 text-white rounded-[24px] font-black uppercase tracking-widest hover:bg-blue-600 transition-all shadow-xl active:scale-95"
+                                    >
+                                        Save & Continue
+                                    </button>
+                                </div>
+                            </div>
+                        </section>
+
+                        <div className="flex justify-center py-8">
+                            <div className="w-16 h-16 rounded-full bg-white border-2 border-slate-100 flex items-center justify-center text-slate-300 animate-bounce">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                                </svg>
+                            </div>
+                        </div>
+
+                        <section ref={step2Ref} className="max-w-7xl mx-auto px-6 py-10 space-y-20">
+                            <div className="text-center space-y-4">
+                                <span className="text-[10px] font-black text-blue-600 uppercase tracking-[0.4em] block">Step 02</span>
+                                <h2 className="text-4xl md:text-6xl font-black text-slate-900 tracking-tight leading-none uppercase">Select Macro <span className="text-blue-600">Shift</span></h2>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+                                {TRENDS.map((trend) => (
+                                    <button
+                                        key={trend.id}
+                                        onClick={() => setActiveTrend(trend)}
+                                        className={`p-12 rounded-[64px] border-4 transition-all duration-500 text-left h-full flex flex-col ${
+                                            activeTrend?.id === trend.id || activeTrend?.label === 'All Trends Integrated'
+                                                ? `border-${trend.color.replace('bg-', '')} bg-white shadow-3xl scale-[1.02]` 
+                                                : 'border-white bg-white shadow-xl hover:shadow-2xl'
+                                        }`}
+                                    >
+                                        <div className={`w-20 h-20 rounded-[32px] ${trend.color} flex items-center justify-center text-5xl mb-10 text-white shadow-2xl`}>{trend.icon}</div>
+                                        <h3 className="text-2xl font-black text-slate-900 mb-4 uppercase leading-none">{trend.label}</h3>
+                                        <p className="text-base text-slate-500 leading-relaxed font-medium">{trend.description}</p>
+                                    </button>
+                                ))}
+                            </div>
+                            <div className="flex justify-center pt-8">
+                                <button
+                                    onClick={() => setActiveTrend({ label: 'All Trends Integrated', color: 'bg-indigo-600', subTrends: ['Holistic'] })}
+                                    className={`px-20 py-10 rounded-[48px] text-2xl font-black uppercase tracking-widest transition-all border-4 shadow-2xl ${
+                                        activeTrend?.label === 'All Trends Integrated' ? 'bg-indigo-600 text-white' : 'bg-white text-slate-400'
+                                    }`}
+                                >
+                                    Select All Trends
+                                </button>
+                            </div>
+
+                            {activeTrend && !currentActivation && (
+                                <div className="mt-20 flex flex-col items-center space-y-8">
+                                    <button 
+                                        onClick={handleGenerate}
+                                        disabled={!isFormValid || isGenerating}
+                                        className={`px-20 py-10 rounded-[64px] text-4xl font-black uppercase tracking-widest transition-all shadow-3xl ${
+                                            isFormValid 
+                                                ? 'bg-slate-900 text-white hover:scale-[1.05] ring-8 ring-green-500/20 shadow-[0_0_50px_rgba(34,197,94,0.4)]' 
+                                                : 'bg-slate-100 text-slate-300'
+                                        }`}
+                                    >
+                                        {isGenerating ? 'Ideating...' : "I'm ready to ideate"}
+                                    </button>
+                                </div>
+                            )}
+
+                            {currentActivation && (
+                                <div className="mt-32 max-w-5xl mx-auto space-y-12">
+                                    <h3 className="text-center text-5xl font-black text-slate-900 tracking-tight uppercase">Media <span className="text-blue-600 italic">Inspiration</span></h3>
+                                    <SandboxConcept activation={currentActivation} color={activeTrend?.color || 'bg-blue-600'} onGenerateMore={handleGenerate} onRiff={handleRiff} />
+                                </div>
+                            )}
+                        </section>
+
+                        <section className="py-32 bg-white">
+                            <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
+                                <div className="space-y-6">
+                                    <h2 className="text-6xl font-black text-slate-900 leading-[1.05] tracking-tighter uppercase">Consult the <br/><span className="text-blue-600 italic">Strategy Agent</span></h2>
+                                    <p className="text-xl text-slate-500 font-medium">Ask the agent for deeper clarity on fandom fragmentation or 'botcasting' mechanics.</p>
+                                    <button 
+                                        onClick={() => setShowChatModal(true)}
+                                        className="px-10 py-5 bg-slate-900 text-white rounded-full font-black uppercase tracking-widest hover:bg-blue-600 transition-all"
+                                    >
+                                        Open Strategy Agent
+                                    </button>
+                                </div>
+                                <div className="relative group">
+                                    <div className="absolute -inset-4 bg-gradient-to-r from-blue-500 to-rose-500 rounded-[48px] blur-2xl opacity-10 group-hover:opacity-20 transition-opacity"></div>
+                                    <div className="relative bg-slate-50 rounded-[40px] p-12 border border-slate-200 aspect-video flex items-center justify-center">
+                                        <span className="text-8xl animate-float">🏛️</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        {showChatModal && (
+                            <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/80 backdrop-blur-md p-4 md:p-10">
+                                <div className="relative w-full max-w-6xl h-full max-h-[90vh]">
+                                    <button 
+                                        onClick={() => setShowChatModal(false)}
+                                        className="absolute -top-16 right-0 text-white hover:text-blue-400 transition-colors flex items-center gap-2 font-black uppercase tracking-widest"
+                                    >
+                                        <span>Close Agent</span>
+                                        <div className="w-10 h-10 rounded-full border-2 border-white flex items-center justify-center">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </div>
+                                    </button>
+                                    <ChatWidget messages={messages} loading={chatLoading} onSendMessage={handleSendMessage} />
+                                </div>
+                            </div>
+                        )}
+                    </main>
+                </div>
+            );
+        };
+
+        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
 </body>
 </html>
